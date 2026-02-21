@@ -45,6 +45,8 @@ env/
 *.zip
 sdd-*/
 docs/dev
+.specify/
+.clinerules/
 
 # Extension system
 .specify/extensions/.cache/

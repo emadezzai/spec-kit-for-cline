@@ -717,6 +717,37 @@ def merge_json_files(existing_path: Path, new_content: dict, verbose: bool = Fal
 def download_template_from_github(ai_assistant: str, download_dir: Path, *, script_type: str = "sh", verbose: bool = True, show_progress: bool = True, client: httpx.Client = None, debug: bool = False, github_token: str = None) -> Tuple[Path, dict]:
     repo_owner = "github"
     repo_name = "spec-kit"
+    pattern = f"spec-kit-template-{ai_assistant}-{script_type}"
+
+    # Check for local build first
+    # This allows testing without needing to publish to GitHub releases
+    # Check current directory first (for local dev)
+    local_release_dir = Path.cwd() / ".genreleases"
+    if not local_release_dir.exists():
+        # Fallback to checking relative to the installed package path
+        script_dir = Path(__file__).parent.parent.parent
+        local_release_dir = script_dir / ".genreleases"
+    if local_release_dir.exists():
+        matching_local = list(local_release_dir.glob(f"{pattern}-*.zip"))
+        if matching_local:
+            local_zip_path = matching_local[0]
+            if verbose:
+                console.print(
+                    f"[cyan]Found local template:[/cyan] {local_zip_path.name}")
+
+            # Copy it to the expected download_dir
+            dest_zip_path = download_dir / local_zip_path.name
+            import shutil
+            shutil.copy2(local_zip_path, dest_zip_path)
+
+            metadata = {
+                "filename": local_zip_path.name,
+                "size": local_zip_path.stat().st_size,
+                "release": "local-dev",
+                "asset_url": "local"
+            }
+            return dest_zip_path, metadata
+
     if client is None:
         client = httpx.Client(verify=ssl_context)
 

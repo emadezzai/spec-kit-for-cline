@@ -90,6 +90,13 @@ find_feature_dir_by_prefix() {
     local branch_name="$2"
     local specs_dir="$repo_root/specs"
 
+    # If specs directory doesn't exist at all, we obviously can't find a matching subdirectory.
+    if [[ ! -d "$specs_dir" ]]; then
+        # For compatibility with existing callers, return a path that won't exist
+        echo "$specs_dir/$branch_name"
+        return
+    fi
+
     # Extract numeric prefix from branch (e.g., "004" from "004-whatever")
     if [[ ! "$branch_name" =~ ^([0-9]{3})- ]]; then
         # If branch doesn't have numeric prefix, fall back to exact match

@@ -55,7 +55,7 @@ uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
 
 **Alternative Sources:**
 
-- **From a fork:** `uv tool install specify-cli --from git+https://github.com/YourUsername/spec-kit.git`
+- **From a fork:** `uv tool install specify-cli --from git+https://github.com/emadezzai/spec-kit.git`
 - **From local directory (for development):** `uv tool install -e .`
 
 Then use the tool directly:

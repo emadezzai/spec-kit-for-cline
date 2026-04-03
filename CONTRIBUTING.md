@@ -71,32 +71,20 @@ For the smoothest review experience, validate changes in this order:
 
 1. **Run focused automated checks first** — use the quick verification commands in [`TESTING.md`](./TESTING.md) to catch packaging, scaffolding, and configuration regressions early.
 2. **Run manual workflow tests second** — if your change affects slash commands or the developer workflow, follow [`TESTING.md`](./TESTING.md) to choose the right commands, run them in an agent, and capture results for your PR.
-3. **Use local release packages when debugging packaged output** — if you need to inspect the exact files CI-style packaging produces, generate local release packages as described below.
+3. **Use local Git installs when debugging packaged output** — if you need to verify the exact install path users get from a Git repository, install the CLI from your local checkout as shown below.
 
 ### Testing template and command changes locally
 
-Running `uv run specify init` pulls released packages, which won’t include your local changes.  
-To test your templates, commands, and other changes locally, follow these steps:
+Running `uv run specify init` uses your working tree, which is the fastest way to validate local changes. If you also want to verify the Git-install path that fork users rely on, install the CLI from your checkout as a Git repository:
 
-1. **Create release packages**
+```bash
+uv tool install specify-cli --force --from "git+file://$(pwd)"
+specify --help
+```
 
-   Run the following command to generate the local packages:
+Then scaffold a fresh test project and open it in the agent you are validating.
 
-   ```bash
-   ./.github/workflows/scripts/create-release-packages.sh v1.0.0
-   ```
-
-2. **Copy the relevant package to your test project**
-
-   ```bash
-   cp -r .genreleases/sdd-copilot-package-sh/. <path-to-test-project>/
-   ```
-
-3. **Open and test the agent**
-
-   Navigate to your test project folder and open the agent to verify your implementation.
-
-If you only need to validate generated file structure and content before doing manual agent testing, start with the focused automated checks in [`TESTING.md`](./TESTING.md). Keep this section for the cases where you need to inspect the exact packaged output locally.
+If you only need to validate generated file structure and content before doing manual agent testing, start with the focused automated checks in [`TESTING.md`](./TESTING.md).
 
 ## AI contributions in Spec Kit
 

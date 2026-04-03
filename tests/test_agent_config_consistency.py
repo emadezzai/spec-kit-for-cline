@@ -253,3 +253,71 @@ class TestAgentConfigConsistency:
     def test_ai_help_includes_iflow(self):
         """CLI help text for --ai should include iflow."""
         assert "iflow" in AI_ASSISTANT_HELP
+
+    # --- Cline consistency checks ---
+
+    def test_cline_in_agent_config(self):
+        """AGENT_CONFIG should include cline with correct folder and commands_subdir."""
+        assert "cline" in AGENT_CONFIG
+        assert AGENT_CONFIG["cline"]["folder"] == ".clinerules/"
+        assert AGENT_CONFIG["cline"]["commands_subdir"] == "workflows"
+        assert AGENT_CONFIG["cline"]["requires_cli"] is False
+        assert AGENT_CONFIG["cline"]["install_url"] is not None
+
+    def test_cline_in_extension_registrar(self):
+        """Extension command registrar should include cline targeting .clinerules/workflows."""
+        cfg = CommandRegistrar.AGENT_CONFIGS
+
+        assert "cline" in cfg
+        assert cfg["cline"]["dir"] == ".clinerules/workflows"
+        assert cfg["cline"]["format"] == "markdown"
+        assert cfg["cline"]["args"] == "$ARGUMENTS"
+        assert cfg["cline"]["extension"] == ".md"
+
+    def test_agent_context_scripts_include_cline(self):
+        """Agent context scripts should support cline agent type."""
+        bash_text = (REPO_ROOT / "scripts" / "bash" / "update-agent-context.sh").read_text(encoding="utf-8")
+        pwsh_text = (REPO_ROOT / "scripts" / "powershell" / "update-agent-context.ps1").read_text(encoding="utf-8")
+
+        assert "cline" in bash_text
+        assert "CLINE_FILE" in bash_text
+        assert "cline" in pwsh_text
+        assert "CLINE_FILE" in pwsh_text
+
+    def test_cline_in_powershell_validate_set(self):
+        """PowerShell update-agent-context script should include 'cline' in ValidateSet."""
+        ps_text = (REPO_ROOT / "scripts" / "powershell" / "update-agent-context.ps1").read_text(encoding="utf-8")
+
+        validate_set_match = re.search(r"\[ValidateSet\(([^)]*)\)\]", ps_text)
+        assert validate_set_match is not None
+        validate_set_values = re.findall(r"'([^']+)'", validate_set_match.group(1))
+
+        assert "cline" in validate_set_values
+
+    def test_ai_help_includes_cline(self):
+        """CLI help text for --ai should include cline."""
+        assert "cline" in AI_ASSISTANT_HELP
+
+    def test_release_workflow_uses_current_repository_for_install_instructions(self):
+        """Release notes should use the current GitHub repository, not hard-coded upstream URLs."""
+        release_text = (REPO_ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+
+        assert "github.com/${{ github.repository }}.git@${VERSION}" in release_text
+        assert "github.com/github/spec-kit.git@${VERSION}" not in release_text
+
+    def test_readme_documents_generic_git_install_and_cline(self):
+        """README should describe generic GitHub install URLs and mention Cline support."""
+        readme_text = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+        assert "git+https://github.com/<OWNER>/<REPO>.git@vX.Y.Z" in readme_text
+        assert "specify init my-project --ai cline" in readme_text
+        assert "[Cline](https://cline.bot/)" in readme_text
+
+    def test_contributing_and_testing_docs_do_not_reference_missing_release_packaging_script(self):
+        """Contributor-facing docs should not point to the removed create-release-packages script."""
+        contributing_text = (REPO_ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
+        testing_text = (REPO_ROOT / "TESTING.md").read_text(encoding="utf-8")
+
+        assert "create-release-packages.sh" not in contributing_text
+        assert "create-release-packages.sh" not in testing_text
+        assert "tests/test_core_pack_scaffold.py" not in testing_text

@@ -29,13 +29,13 @@ uv sync --extra test
 source .venv/bin/activate  # On Windows (CMD): .venv\Scripts\activate  |  (PowerShell): .venv\Scripts\Activate.ps1
 ```
 
-### Generated package structure and content
+### Generated integration and scaffold coverage
 
 ```bash
-uv run python -m pytest tests/test_core_pack_scaffold.py -q
+uv run python -m pytest tests/integrations -q
 ```
 
-This validates the generated files that CI-style packaging depends on, including directory layout, file names, frontmatter/TOML validity, placeholder replacement, `.specify/` path rewrites, and parity with `create-release-packages.sh`.
+This validates generated integration output, including directory layout, file names, frontmatter/TOML validity, placeholder replacement, `.specify/` path rewrites, manifests, and bundled update-context wrappers.
 
 ### Agent configuration and release wiring consistency
 
@@ -45,13 +45,13 @@ uv run python -m pytest tests/test_agent_config_consistency.py -q
 
 Run this when you change agent metadata, release scripts, context update scripts, or artifact naming.
 
-### Optional single-agent packaging spot check
+### Optional single-agent scaffold spot check
 
 ```bash
-AGENTS=copilot SCRIPTS=sh ./.github/workflows/scripts/create-release-packages.sh v1.0.0
+uv run specify init /tmp/speckit-copilot --ai copilot --offline --script sh
 ```
 
-Inspect `.genreleases/sdd-copilot-package-sh/` and the matching ZIP in `.genreleases/` when you want to review the exact packaged output for one agent/script combination.
+Inspect the generated project under `/tmp/speckit-copilot/` when you want to review the exact scaffolded output for one agent/script combination.
 
 ## Manual testing process
 
@@ -78,7 +78,7 @@ cd /tmp/speckit-test
 # Open in your agent
 ```
 
-If you are testing the packaged output rather than the live source tree, create a local release package first as described in [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+If you are testing the Git-install path rather than the live source tree, install from your checkout as described in [`CONTRIBUTING.md`](./CONTRIBUTING.md), then rerun the same scaffold checks against that installed `specify` binary.
 
 ## Reporting results
 

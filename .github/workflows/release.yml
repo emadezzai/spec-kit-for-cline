@@ -66,7 +66,7 @@ jobs:
           ## Install
 
           \`\`\`bash
-          uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@${VERSION}
+          uv tool install specify-cli --from git+https://github.com/${{ github.repository }}.git@${VERSION}
           specify init my-project
           \`\`\`
 
@@ -86,4 +86,3 @@ jobs:
             --notes-file release_notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
